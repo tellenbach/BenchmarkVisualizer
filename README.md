@@ -20,29 +20,31 @@ group identifiers.
 The following example should clarify things:
 
 ```c++
-    static void BM_VectorPush(benchmark::State& state) {
-    	std::vector<int> vec;
-    	for (auto _ : state) {
-    		for (int i = 0; i < state.range(0); ++i) 
-    			benchmark::DoNotOptimize(vec.push_back(i));
-    	}
-    	// Identification of x values
-    	state.counters["Size"] = state.range(0);
-    	// Benchmark group
-    	state.counters["benchmark_visualizer_group"] = 0;
+  static void BM_VectorPush(benchmark::State& state) {
+    std::vector<int> vec;
+    for (auto _ : state) {
+    	for (int i = 0; i < state.range(0); ++i) 
+    		benchmark::DoNotOptimize(vec.push_back(i));
     }
 
-    static void BM_VectorAccess(benchmark::State& state) {
-    	std::vector<int> vec(state.range(0));
-    	for (auto _ : state) {
-    		for (int i = 0; i < state.range(0); ++i) 
-    			benchmark::DoNotOptimize(vec[i] = i);
-    	}
-    	// Identification of x values
-    	state.counters["Size"] = state.range(0);
-    	// Benchmark group
-    	state.counters["benchmark_visualizer_group"] = 1;
+    // Identification of x values
+    state.counters["Size"] = state.range(0);
+
+    // Benchmark group
+    state.counters["benchmark_visualizer_group"] = 0;
+  }
+
+  static void BM_VectorAccess(benchmark::State& state) {
+    std::vector<int> vec(state.range(0));
+    for (auto _ : state) {
+    	for (int i = 0; i < state.range(0); ++i) 
+    		benchmark::DoNotOptimize(vec[i] = i);
     }
+    // Identification of x values
+    state.counters["Size"] = state.range(0);
+    // Benchmark group
+    state.counters["benchmark_visualizer_group"] = 1;
+  }
 
 You might ask now: Why not just identify the benchmarks by its names? Well first
 of all, the benchmark library provides results in the form
@@ -53,18 +55,18 @@ but we could obviously split these. The real reason to avoid splitting of names
 is when template functions are involved. Consider the benchmark
 
 ```c++
-		template<typename T>
-		static void BM_VectorPush(benchmark::State& state) {
-			std::vector<T> vec;
-			for (auto _ : state) {
-    		for (int i = 0; i < state.range(0); ++i) 
-    			benchmark::DoNotOptimize(vec[i] = i);
-    	}
-		}
+	template<typename T>
+	static void BM_VectorPush(benchmark::State& state) {
+		std::vector<T> vec;
+		for (auto _ : state) {
+    	for (int i = 0; i < state.range(0); ++i) 
+    		benchmark::DoNotOptimize(vec[i] = i);
+    }
+	}
 
 Its results will be shown as
 
-		BM_VectorPush<int>/arg
+	BM_VectorPush<int>/arg
 
 When splitting at ``/`` a comparison between ``BM_VectorPush<int>`` and 
 ``BM_VectorPush<double>`` is not possible anymore.
