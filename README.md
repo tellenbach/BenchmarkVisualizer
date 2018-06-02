@@ -21,30 +21,24 @@ The following example should clarify things:
 
     static void BM_VectorPush(benchmark::State& state) {
     	std::vector<int> vec;
-
     	for (auto _ : state) {
     		for (int i = 0; i < state.range(0); ++i) 
     			benchmark::DoNotOptimize(vec.push_back(i));
     	}
-
     	// Identification of x values
     	state.counters["Size"] = state.range(0);
-
     	// Benchmark group
     	state.counters["benchmark_visualizer_group"] = 0;
     }
 
     static void BM_VectorAccess(benchmark::State& state) {
     	std::vector<int> vec(state.range(0));
-
     	for (auto _ : state) {
     		for (int i = 0; i < state.range(0); ++i) 
     			benchmark::DoNotOptimize(vec[i] = i);
     	}
-
     	// Identification of x values
     	state.counters["Size"] = state.range(0);
-
     	// Benchmark group
     	state.counters["benchmark_visualizer_group"] = 1;
     }
