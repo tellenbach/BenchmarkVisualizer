@@ -19,6 +19,7 @@ group identifiers.
 
 The following example should clarify things:
 
+```c++
     static void BM_VectorPush(benchmark::State& state) {
     	std::vector<int> vec;
     	for (auto _ : state) {
@@ -51,6 +52,7 @@ of all, the benchmark library provides results in the form
 but we could obviously split these. The real reason to avoid splitting of names
 is when template functions are involved. Consider the benchmark
 
+```c++
 		template<typename T>
 		static void BM_VectorPush(benchmark::State& state) {
 			std::vector<T> vec;
@@ -84,6 +86,7 @@ the output can be saved automatically.
 
 The ``benchmark_visualizer`` script takes the following arguments
 
+```bash
 		$ ./benchmark_visualizer --help
 		usage: benchmark_visualizer [-h] --file FILE [--time_unit {ns,us,ms}]
                             [--title TITLE] [--y_label Y_LABEL]
@@ -120,3 +123,6 @@ The important ones are
 		--group_desc, -g 				Names for the benchmark groups using the following pattern:
 																1:NAME_OF_GROUP_1,2:NAME_OF_GROUP_2,...
 
+## Example
+
+Consider the following benchmark:
