@@ -119,14 +119,77 @@ optional arguments:
 		  --tick_step VALUE     Set the steps of the x ticks manually
 		  --group_desc DESC, -g DESC
 ```
+
 The important ones are
 
-		--x_value, -x 					Specify the name of the counter that identifies the x valued
-		--file, -f              Specify the file that contains the benchmark results as JSON
-		--output_file, -o 			Specify the name of the file that contains the benchmark plot
-		--group_desc, -g 				Names for the benchmark groups using the following pattern:
-																1:NAME_OF_GROUP_1,2:NAME_OF_GROUP_2,...
+	--x_value, -x 					Specify the name of the counter that identifies the x valued
+	--file, -f              Specify the file that contains the benchmark results as JSON
+	--output_file, -o 			Specify the name of the file that contains the benchmark plot
+	--group_desc, -g 				Names for the benchmark groups using the following pattern:
+														1:NAME_OF_GROUP_1,2:NAME_OF_GROUP_2,...
 
 ## Example
 
-Consider the following benchmark:
+Consider the following benchmark names ``benchmark.cc``
+
+```c++
+#include <vector>
+#include <benchmark/benchmark.h>
+
+static void BM_VectorPush(benchmark::State& state) {
+  std::vector<int> vec;
+  for (auto _ : state) {
+    for (int i = 0; i < state.range(0); ++i) {
+    	vec.push_back(i);
+    }
+  }
+
+  // Identification of x values
+  state.counters["Size"] = state.range(0);
+
+  // Benchmark group
+  state.counters["benchmark_visualizer_group"] = 0;
+}
+
+static void BM_VectorAccess(benchmark::State& state) {
+  std::vector<int> vec(state.range(0));
+  for (auto _ : state) {
+    for (int i = 0; i < state.range(0); ++i) {
+  		vec[i] = i;
+    }
+  }
+
+  // Identification of x values
+  state.counters["Size"] = state.range(0);
+
+  // Benchmark group
+  state.counters["benchmark_visualizer_group"] = 1;
+}
+
+BENCHMARK(BM_VectorPush)
+	->Arg(10)
+	->Arg(100)
+	->Arg(1000)
+	->Arg(10000);
+
+BENCHMARK(BM_VectorAccess)
+	->Arg(10)
+	->Arg(100)
+	->Arg(1000)
+	->Arg(10000);
+
+BENCHMARK_MAIN();
+```
+
+Compile and run it:
+
+	$ clang++ -std=c++11 -lbenchmark benchmark.cc -o benchmark
+	$ ./benchmark --benchmark_out=benchmark_results.json --benchmark_out_format=json
+
+Visualize it:
+
+	$ ./benchmark_visualizer --file=benchmark_results.json --x_value=Size --title="My first benchmark" --output_file=results.png --group_desc=1:"Vector with push_back()",2:"Vector with element access"
+
+The result is
+
+![Image of benchmark](results.png)

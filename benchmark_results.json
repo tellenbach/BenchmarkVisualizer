@@ -1,0 +1,110 @@
+{
+  "context": {
+    "date": "2018-06-03 01:05:23",
+    "executable": "./benchmark",
+    "num_cpus": 8,
+    "mhz_per_cpu": 2300,
+    "cpu_scaling_enabled": false,
+    "caches": [
+      {
+        "type": "Data",
+        "level": 1,
+        "size": 32768000,
+        "num_sharing": 2
+      },
+      {
+        "type": "Instruction",
+        "level": 1,
+        "size": 32768000,
+        "num_sharing": 2
+      },
+      {
+        "type": "Unified",
+        "level": 2,
+        "size": 262144000,
+        "num_sharing": 2
+      },
+      {
+        "type": "Unified",
+        "level": 3,
+        "size": 6291456000,
+        "num_sharing": 8
+      }
+    ],
+    "library_build_type": "release"
+  },
+  "benchmarks": [
+    {
+      "name": "BM_VectorPush/10",
+      "iterations": 2279833,
+      "real_time": 2.7536262480509072e+02,
+      "cpu_time": 2.7529998907814735e+02,
+      "time_unit": "ns",
+      "Size": 1.0000000000000000e+01,
+      "benchmark_visualizer_group": 0.0000000000000000e+00
+    },
+    {
+      "name": "BM_VectorPush/100",
+      "iterations": 270859,
+      "real_time": 2.5127614183129881e+03,
+      "cpu_time": 2.5121151595479560e+03,
+      "time_unit": "ns",
+      "Size": 1.0000000000000000e+02,
+      "benchmark_visualizer_group": 0.0000000000000000e+00
+    },
+    {
+      "name": "BM_VectorPush/1000",
+      "iterations": 27429,
+      "real_time": 2.5000643917185687e+04,
+      "cpu_time": 2.4991468883298694e+04,
+      "time_unit": "ns",
+      "Size": 1.0000000000000000e+03,
+      "benchmark_visualizer_group": 0.0000000000000000e+00
+    },
+    {
+      "name": "BM_VectorPush/10000",
+      "iterations": 2677,
+      "real_time": 2.4482364661973855e+05,
+      "cpu_time": 2.4481098244303316e+05,
+      "time_unit": "ns",
+      "Size": 1.0000000000000000e+04,
+      "benchmark_visualizer_group": 0.0000000000000000e+00
+    },
+    {
+      "name": "BM_VectorAccess/10",
+      "iterations": 9907717,
+      "real_time": 6.6736518614407657e+01,
+      "cpu_time": 6.6732023129041735e+01,
+      "time_unit": "ns",
+      "Size": 1.0000000000000000e+01,
+      "benchmark_visualizer_group": 1.0000000000000000e+00
+    },
+    {
+      "name": "BM_VectorAccess/100",
+      "iterations": 1128595,
+      "real_time": 6.5603552027171474e+02,
+      "cpu_time": 6.5598642559997188e+02,
+      "time_unit": "ns",
+      "Size": 1.0000000000000000e+02,
+      "benchmark_visualizer_group": 1.0000000000000000e+00
+    },
+    {
+      "name": "BM_VectorAccess/1000",
+      "iterations": 116225,
+      "real_time": 5.8574330049504224e+03,
+      "cpu_time": 5.8572940417294112e+03,
+      "time_unit": "ns",
+      "Size": 1.0000000000000000e+03,
+      "benchmark_visualizer_group": 1.0000000000000000e+00
+    },
+    {
+      "name": "BM_VectorAccess/10000",
+      "iterations": 11380,
+      "real_time": 6.0935361072075713e+04,
+      "cpu_time": 6.0929964850615179e+04,
+      "time_unit": "ns",
+      "Size": 1.0000000000000000e+04,
+      "benchmark_visualizer_group": 1.0000000000000000e+00
+    }
+  ]
+}
