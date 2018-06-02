@@ -20,32 +20,34 @@ group identifiers.
 The following example should clarify things:
 
 ```c++
-  static void BM_VectorPush(benchmark::State& state) {
-    std::vector<int> vec;
-    for (auto _ : state) {
-    	for (int i = 0; i < state.range(0); ++i) 
-    		benchmark::DoNotOptimize(vec.push_back(i));
-    }
-
-    // Identification of x values
-    state.counters["Size"] = state.range(0);
-
-    // Benchmark group
-    state.counters["benchmark_visualizer_group"] = 0;
+static void BM_VectorPush(benchmark::State& state) {
+  std::vector<int> vec;
+  for (auto _ : state) {
+    for (int i = 0; i < state.range(0); ++i) 
+    	benchmark::DoNotOptimize(vec.push_back(i));
   }
 
-  static void BM_VectorAccess(benchmark::State& state) {
-    std::vector<int> vec(state.range(0));
-    for (auto _ : state) {
-    	for (int i = 0; i < state.range(0); ++i) 
-    		benchmark::DoNotOptimize(vec[i] = i);
-    }
-    // Identification of x values
-    state.counters["Size"] = state.range(0);
-    // Benchmark group
-    state.counters["benchmark_visualizer_group"] = 1;
+  // Identification of x values
+  state.counters["Size"] = state.range(0);
+
+  // Benchmark group
+  state.counters["benchmark_visualizer_group"] = 0;
+}
+
+static void BM_VectorAccess(benchmark::State& state) {
+  std::vector<int> vec(state.range(0));
+  for (auto _ : state) {
+    for (int i = 0; i < state.range(0); ++i) 
+  		benchmark::DoNotOptimize(vec[i] = i);
   }
 
+  // Identification of x values
+  state.counters["Size"] = state.range(0);
+
+  // Benchmark group
+  state.counters["benchmark_visualizer_group"] = 1;
+}
+```
 You might ask now: Why not just identify the benchmarks by its names? Well first
 of all, the benchmark library provides results in the form
 
@@ -55,18 +57,18 @@ but we could obviously split these. The real reason to avoid splitting of names
 is when template functions are involved. Consider the benchmark
 
 ```c++
-	template<typename T>
-	static void BM_VectorPush(benchmark::State& state) {
-		std::vector<T> vec;
-		for (auto _ : state) {
-    	for (int i = 0; i < state.range(0); ++i) 
-    		benchmark::DoNotOptimize(vec[i] = i);
-    }
-	}
-
+template<typename T>
+static void BM_VectorPush(benchmark::State& state) {
+	std::vector<T> vec;
+	for (auto _ : state) {
+    for (int i = 0; i < state.range(0); ++i) 
+    	benchmark::DoNotOptimize(vec[i] = i);
+  }
+}
+```
 Its results will be shown as
 
-	BM_VectorPush<int>/arg
+		BM_VectorPush<int>/arg
 
 When splitting at ``/`` a comparison between ``BM_VectorPush<int>`` and 
 ``BM_VectorPush<double>`` is not possible anymore.
@@ -89,17 +91,17 @@ the output can be saved automatically.
 The ``benchmark_visualizer`` script takes the following arguments
 
 ```bash
-		$ ./benchmark_visualizer --help
-		usage: benchmark_visualizer [-h] --file FILE [--time_unit {ns,us,ms}]
+$ ./benchmark_visualizer --help
+usage: benchmark_visualizer [-h] --file FILE [--time_unit {ns,us,ms}]
                             [--title TITLE] [--y_label Y_LABEL]
                             [--x_label X_LABEL] --x_value X_VALUE
                             --output_file FILE [--tick_begin VALUE]
                             [--tick_end VALUE] [--tick_step VALUE]
                             --group_desc DESC
 
-		Visualize Google Benchmark.
+Visualize Google Benchmark.
 
-		optional arguments:
+optional arguments:
 		  -h, --help            show this help message and exit
 		  --file FILE, -f FILE  Path to JSON file with benchmark results
 		  --time_unit {ns,us,ms}, -t {ns,us,ms}
@@ -116,7 +118,7 @@ The ``benchmark_visualizer`` script takes the following arguments
 		  --tick_end VALUE      Set the end of the x ticks manually
 		  --tick_step VALUE     Set the steps of the x ticks manually
 		  --group_desc DESC, -g DESC
-
+```
 The important ones are
 
 		--x_value, -x 					Specify the name of the counter that identifies the x valued
