@@ -188,7 +188,8 @@ Compile and run it:
 
 Visualize it:
 
-	$ ./benchmark_visualizer --file=benchmark_results.json --x_value=Size --title="My first benchmark" --output_file=results.png --group_desc=1:"Vector with push_back()",2:"Vector with element access"
+	$ ./benchmark_visualizer --file=benchmark_results.json --x_value=Size --title="My first benchmark"
+	  --output_file=results.png --group_desc=1:"Vector with push_back()",2:"Vector with element access"
 
 The result is
 
