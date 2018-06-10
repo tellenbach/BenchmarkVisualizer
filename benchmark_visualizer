@@ -24,200 +24,156 @@
 
 import argparse
 import json
-import datetime
-import os
-from enum import Enum
 import matplotlib as plt
 plt.use('Agg')
 import matplotlib.pyplot as pyplot
 
-# Logging facilities
-INFO = '\033[92m'
-WARNING = '\033[93m'
-FAIL = '\033[91m'
-ENDC = '\033[0m'
-
-def _LOG(message, logLevel):
-	# See http://no-color.org/
-	if os.environ.get('NO_COLOR'):
-		print("[{}][{}] {}".format(datetime.datetime.now(), logLevel, message))
-	else:
-		if logLevel == "INFO":
-			print(INFO + "[{}][{}] {}".format(datetime.datetime.now(), logLevel,
-	              message) + ENDC)
-		elif logLevel == "WARNING":
-			print(WARNING + "[{}][{}] {}".format(datetime.datetime.now(), logLevel,
-				  message) + ENDC)
-		elif logLevel == "ERROR":
-			print(FAIL + "[{}][{}] {}".format(datetime.datetime.now(), logLevel,
-				  message) + ENDC)
-
-def LOG_INFO(message):
-	_LOG(message, "INFO")
-
-def LOG_WARNING(message):
-	_LOG(message, "WARNING")
-
-def LOG_ERROR(message):
-	_LOG(message, "ERROR")
-
 def convertTimeUnit(value, src, dest):
-	if src == dest:
-		return value
-	if src == "ns":
-		if dest == "us":
-			return value / 1000
-		if dest == "ms":
-			return value / 1000000
-	elif src == "us":
-		if dest == "ns":
-			return value * 1000
-		if dest == "ms":
-			return value / 1000
-	elif src == "ms":
-		if dest == "ns":
-			return value * 1000000
-		if dest == "us":
-			return value * 10000
+  if src == dest:
+    return value
+  if src == "ns":
+    if dest == "us":
+      return value / 1000
+    if dest == "ms":
+      return value / 1000000
+  elif src == "us":
+    if dest == "ns":
+      return value * 1000
+    if dest == "ms":
+      return value / 1000
+  elif src == "ms":
+    if dest == "ns":
+      return value * 1000000
+    if dest == "us":
+      return value * 10000
 
 
 def parseJSON(file, xValue, yValue="real_time", timeUnit="ns"):
-	# Open file and extract json
-	with open(file) as fd:
-		data = json.load(fd)
+  # Open file and extract json
+  with open(file) as fd:
+    data = json.load(fd)
 
-	ret = []
-	for bench in data["benchmarks"]:
-		# Convert time units if necessary
-		if bench["time_unit"] != timeUnit:
-			bench[yValue] = convertTimeUnit(bench[yValue], bench["time_unit"],
-			                                timeUnit)
-		tmp = (bench["benchmark_visualizer_group"], bench[xValue], bench[yValue], timeUnit)
-		ret.append(tmp)
+  ret = []
+  for bench in data["benchmarks"]:
+    # Convert time units if necessary
+    if bench["time_unit"] != timeUnit:
+      bench[yValue] = convertTimeUnit(bench[yValue], bench["time_unit"],
+                                      timeUnit)
+    tmp = (bench["benchmark_visualizer_group"], bench[xValue], bench[yValue], timeUnit)
+    ret.append(tmp)
 
-	return ret
+  return ret
 
 def plot(data, xLabel, yLabel, plotTitle, pathToOut, groupDesc, tickBegin=0,
-				 tickEnd=-1, tickStep="auto"):
-	benchmarkDict = dict()
+         tickEnd=-1, tickStep="auto"):
+  benchmarkDict = dict()
 
-	for bench in data:
-		# If no list for this benchmark (group) exist, we create one
-		if bench[0] not in benchmarkDict:
-			benchmarkDict.update({bench[0]: ([], [])})
+  for bench in data:
+    # If no list for this benchmark (group) exist, we create one
+    if bench[0] not in benchmarkDict:
+      benchmarkDict.update({bench[0]: ([], [])})
 
-		# Append x value if necessary
-		if bench[1] not in benchmarkDict[bench[0]][0]:
-			benchmarkDict[bench[0]][0].append(bench[1])
+    # Append x value if necessary
+    if bench[1] not in benchmarkDict[bench[0]][0]:
+      benchmarkDict[bench[0]][0].append(bench[1])
 
-		# Append y value
-		benchmarkDict[bench[0]][1].append(bench[2])
+    # Append y value
+    benchmarkDict[bench[0]][1].append(bench[2])
+    
+  for key, value in benchmarkDict.items():
+    # Add plotting data
+    pyplot.plot(value[0], value[1], marker='o', label=groupDesc[int(key)])
 
-	# Add plotting data
-	for key, value in benchmarkDict.items():
-		if key not in groupDesc:
-			groupDesc[key] = key
+  pyplot.title(plotTitle)
+  pyplot.ylabel(yLabel)
+  pyplot.xlabel(xLabel)
+  pyplot.legend()
+  pyplot.grid()
 
+  if tickEnd == -1:
+    for key, val in benchmarkDict.items():
+      if max(val[0]) > tickEnd:
+        tickEnd = max(val[0])
 
-		pyplot.plot(value[0], value[1], marker='o', label=groupDesc[key])
+  if tickStep != "auto":
+    pyplot.xticks(range(int(tickBegin), int(tickEnd)+1, int(tickStep)))
 
-	pyplot.title(plotTitle)
-	pyplot.ylabel(yLabel)
-	pyplot.xlabel(xLabel)
-	pyplot.legend()
-	pyplot.grid()
-
-	if tickEnd == -1:
-		for key, val in benchmarkDict.items():
-			if  max(val[0]) > tickEnd:
-				tickEnd = max(val[0])
-
-	if tickStep != "auto":
-		pyplot.xticks(range(int(tickBegin), int(tickEnd)+1, int(tickStep)))
-
-	pyplot.savefig(pathToOut, bbox_inches='tight')
+  pyplot.savefig(pathToOut, bbox_inches='tight')
 
 def main():
-	parser = argparse.ArgumentParser(description = "Visualize Google Benchmark.")
+  parser = argparse.ArgumentParser(description = "Visualize Google Benchmark.")
 
-	parser.add_argument("--file", "-f",
+  parser.add_argument("--file", "-f",
                       metavar = "FILE", 
                       help = "Path to JSON file with benchmark results",
                       dest = "pathToFile",
                       required = True)
-	parser.add_argument("--time_unit", "-t",
-		                  choices = ["ns", "us", "ms"],
-		                  help = "Time unit for measured durations",
-		                  dest = "timeUnit",
-		                  default = "ns")
-	parser.add_argument("--title",
-		                  metavar = "TITLE",
-		                  help = "Diagram title",
-		                  dest = "title",
-		                  default = "Benchmark Results")
-	parser.add_argument("--y_label",
-		                  metavar = "Y_LABEL",
-		                  dest = "yLabel",
-		                  help = "Lable on the y axis")
-	parser.add_argument("--x_label",
-		                  metavar = "X_LABEL",
-		                  dest = "xLabel",
-		                  help = "Label on the x axis")
-	parser.add_argument("--x_value", "-x",
-		                  metavar = "X_VALUE",
-		                  dest = "xValue",
-		                  help = "Name of the counter that stores the x value",
-		                  required = True)
-	parser.add_argument("--output_file", "-o",
-		                  metavar = "FILE",
-		                  help = "Path to file where the image of the diagram will "
-								             "be stored.",
-						          dest = "pathToOut",
-						          required = True)
-	parser.add_argument("--tick_begin",
-		                  metavar = "VALUE",
-		                  help = "Set the begin of the x ticks manually",
-		                  dest = "tickBegin",
-		                  default = 0)
-	parser.add_argument("--tick_end",
-		                  metavar = "VALUE",
-		                  help = "Set the end of the x ticks manually",
-		                  dest = "tickEnd",
-		                  default = -1)
-	parser.add_argument("--tick_step",
-		                  metavar = "VALUE",
-		                  help = "Set the steps of the x ticks manually",
-		                  dest = "tickStep",
-		                  default = "auto")
-	parser.add_argument("--group_desc", "-g",
-											metavar = "DESC",
-											help = "",
-											type = (lambda s: [item.split(':') for item in s.split(',')]),
-											dest = "groupDesc",
-											required = True)
+  parser.add_argument("--time_unit", "-t",
+                      choices = ["ns", "us", "ms"],
+                      help = "Time unit for measured durations",
+                      dest = "timeUnit",
+                      default = "ns")
+  parser.add_argument("--title",
+                      metavar = "TITLE",
+                      help = "Diagram title",
+                      dest = "title",
+                      default = "Benchmark Results")
+  parser.add_argument("--y_label",
+                      metavar = "Y_LABEL",
+                      dest = "yLabel",
+                      help = "Lable on the y axis")
+  parser.add_argument("--x_label",
+                      metavar = "X_LABEL",
+                      dest = "xLabel",
+                      help = "Label on the x axis")
+  parser.add_argument("--x_value", "-x",
+                      metavar = "X_VALUE",
+                      dest = "xValue",
+                      help = "Name of the counter that stores the x value",
+                      required = True)
+  parser.add_argument("--output_file", "-o",
+                      metavar = "FILE",
+                      help = "Path to file where the image of the diagram will "
+                             "be stored.",
+                      dest = "pathToOut",
+                      required = True)
+  parser.add_argument("--tick_begin",
+                      metavar = "VALUE",
+                      help = "Set the begin of the x ticks manually",
+                      dest = "tickBegin",
+                      default = 0)
+  parser.add_argument("--tick_end",
+                      metavar = "VALUE",
+                      help = "Set the end of the x ticks manually",
+                      dest = "tickEnd",
+                      default = -1)
+  parser.add_argument("--tick_step",
+                      metavar = "VALUE",
+                      help = "Set the steps of the x ticks manually",
+                      dest = "tickStep",
+                      default = "auto")
+  parser.add_argument("--group_desc", "-g",
+                      metavar = "DESC",
+                      nargs='*',
+                      help = "",
+                      dest = "groupDesc",
+                      required = True)
 
-	args = parser.parse_args()
+  args = parser.parse_args()
 
-	if args.xLabel is None:
-		xLabel = args.xValue
-	else:
-		xLabel = args.xLabel
+  if args.xLabel is None:
+    xLabel = args.xValue
+  else:
+    xLabel = args.xLabel
 
-	if args.yLabel is None:
-		yLabel = "Time in {}".format(args.timeUnit)
-	else:
-		yLabel = args.yLabel
+  if args.yLabel is None:
+    yLabel = "Time in {}".format(args.timeUnit)
+  else:
+    yLabel = args.yLabel
 
-	groupDesc = dict()
-
-	for element in args.groupDesc:
-		groupDesc[int(element[0])] = element[1]
-
-	plot(parseJSON(args.pathToFile, args.xValue, timeUnit = args.timeUnit),
-		   xLabel, yLabel, args.title, args.pathToOut, groupDesc, args.tickBegin,
-		   args.tickEnd, args.tickStep)
-
-	
+  plot(parseJSON(args.pathToFile, args.xValue, timeUnit = args.timeUnit),
+       xLabel, yLabel, args.title, args.pathToOut, args.groupDesc, args.tickBegin,
+       args.tickEnd, args.tickStep)
 
 main()
 
