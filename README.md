@@ -1,4 +1,4 @@
-# GoogleBenchmarkVisualizer
+# BenchmarkVisualizer
 
 ## Writing a benchmark
 
