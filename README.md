@@ -130,7 +130,7 @@ The important ones are
 
 ## Example
 
-Consider the following benchmark names ``benchmark.cc``
+Consider the following benchmark named ``benchmark.cc``
 
 ```c++
 #include <vector>
@@ -183,13 +183,12 @@ BENCHMARK_MAIN();
 
 Compile and run it:
 
-  $ clang++ -std=c++11 -lbenchmark benchmark.cc -o benchmark
-  $ ./benchmark --benchmark_out=benchmark_results.json --benchmark_out_format=json
+    $ clang++ -std=c++11 -lbenchmark benchmark.cc -o benchmark
+    $ ./benchmark --benchmark_out=benchmark_results.json --benchmark_out_format=json
 
 Visualize it:
 
-  $ ./benchmark_visualizer --file=benchmark_results.json --x_value=Size --title="My first benchmark"
-    --output_file=results.png -g "Vector with push_back()" "Vector with element access"
+    $ ./benchmark_visualizer --file=benchmark_results.json --x_value=Size --title="My first benchmark" --output_file=results.png -g "Vector with push_back()" "Vector with element access"
 
 The result is
 
