@@ -22,15 +22,29 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+# For parsing cli arguments
 import argparse
+
+# For parsing JSON files
 import json
+
+# Plotting library
 import matplotlib as plt
 plt.use('Agg')
 import matplotlib.pyplot as pyplot
+
+# To access more matplotlib functionality, i.e., default calculated figure
+# size
 from pylab import rcParams
-import datetime
+
+_version = 0.2
+
+def getVersion(parser):
+  '''Print program name, description and current version'''
+  return "{} - {} - Version {}".format(parser.prog, parser.description, _version)
 
 class PlottingConfiguration:
+  '''Configuration of the benchmark plot'''
 
   def __init__(self, args):
     self.inputFile = args.inputFile
@@ -59,6 +73,11 @@ class PlottingConfiguration:
     self.dpi = args.dpi
 
 def convertTimeUnit(value, src, dest):
+  '''Convert time units'''
+
+  # This function is necessary since popular libraries like datatime cannot
+  # handle nanoseconds
+
   if src == dest:
     return value
   if src == "ns":
@@ -78,7 +97,8 @@ def convertTimeUnit(value, src, dest):
       return value * 10000
 
 def parseJSON(configuration):
-  # Open file and extract json
+  '''Parses JSON file containing benchmark results'''
+
   with open(configuration.inputFile) as fd:
     data = json.load(fd)
 
@@ -111,6 +131,8 @@ def plot(data, configuration):
     # Append y value
     benchmarkDict[bench[0]][1].append(bench[2])
   
+  # Use passed arguments if possible, otherwise use automatically calculated
+  # figure size
   if configuration.xSize is None and configuration.xSize is None:
     pyplot.figure(dpi=configuration.dpi)
   elif configuration.xSize is None:
@@ -137,6 +159,7 @@ def plot(data, configuration):
   pyplot.legend()
   pyplot.grid()
 
+  # If no end for the x values is set, just take the maximum of them
   if configuration.xTickEnd == -1:
     for key, val in benchmarkDict.items():
       if max(val[0]) > configuration.xTickEnd:
@@ -149,8 +172,13 @@ def plot(data, configuration):
   pyplot.savefig(configuration.outputFile, bbox_inches='tight')
 
 def main():
-  parser = argparse.ArgumentParser(description = "Visualize Google Benchmark.")
+  # Parse command line arguments
+  parser = argparse.ArgumentParser(description = "Visualize Google Benchmark.",
+                                   prog = "Benchmark Visualizer")
 
+  parser.add_argument("--version", "-v",
+                      version = getVersion(parser),
+                      action = "version")
   parser.add_argument("--input_file", "-i",
                       metavar = "FILE", 
                       help = "Path to JSON file with benchmark results",
@@ -233,5 +261,5 @@ def main():
   data = parseJSON(configuration)
   plot(data, configuration)
 
-main()
-
+if __name__ == "__main__":
+  main()
